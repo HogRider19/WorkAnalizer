@@ -1,6 +1,9 @@
-import csv
+from multiprocessing import context
 import requests
+import datetime
+import csv 
 import json
+import os
 from fake_useragent import UserAgent
 from requests import HTTPError
 
@@ -52,9 +55,23 @@ def get_content(vacancy_name, num_page=1):
     return content
 
 
+def save_csv(content, key_word='unknow'):
+    """Сохранение результатов в csv файл"""
+    time_now = datetime.datetime.now().strftime('%d_%m_%y_%H_%M')
+
+    with open(f'data/[{key_word}] {time_now}.csv', 'w', newline='') as file:
+        writer = csv.DictWriter(file, fieldnames=content[0].keys())
+
+        writer.writeheader()
+        for row in content:
+            writer.writerow(row)
+
+
+
 
 def main():
-    print(get_content('Python develper', 3)[0])
+    content = get_content('Python develper', 1)
+    save_csv(content, 'Python develper')
 
 
 if __name__ == '__main__':
