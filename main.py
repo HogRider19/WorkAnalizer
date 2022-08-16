@@ -13,17 +13,28 @@ HEADERS = {'User-Agent': UserAgent().chrome}
 
 def get_json(url, params = None):
     """Запрос json файла с вакансиями"""
-    try:
-        response = requests.get(url, params=params, headers=HEADERS)
-        response.raise_for_status()
-        return response.json()['items']
-    except HTTPError as http_err:
-        print(f'[INFO]: HTTP error: {http_err}')
+    session = requests.Session()
+    response = session.get(url, params=params, headers=HEADERS)
+
+    if response.status_code == 200:
+        items = list(map(lambda x: x['id'], response.json()['items']))
+        content_list = []
+        for index, content_id in enumerate(items):
+            try:
+                content = session.get(url+f'{content_id}', headers=HEADERS).json()
+                content_list.append(content)
+            except HTTPError as http_err:
+                print(f'[INFO]: HTTP error: {http_err}')
+        session.close()
+        return content_list
+    else:
+        return []
+
 
 
 def content_filter(content_page):
     """Отбирает определенные поля из словаря с вакансиями"""
-    required_fields = ['id', 'name', 'area', 'salary', 'address', 'published_at', 'url', 'employer', 'snippet']
+    required_fields = ['id', 'name', 'published_at', 'alternate_url', 'description', 'key_skills']
 
     filter_content_page = []
     for content in content_page:
@@ -31,15 +42,30 @@ def content_filter(content_page):
         for required_field in required_fields:
             filter_content[required_field] = content[required_field]
 
+        def none_filter(data_dict, kw):
+            try:
+                return data_dict[kw]
+            except TypeError:
+                return '' 
+
+        filter_content['sal_from'] = none_filter(content['salary'], 'from')
+        filter_content['sal_to'] = none_filter(content['salary'], 'to')
+        filter_content['currency'] = none_filter(content['salary'], 'currency')
+        filter_content['city'] = none_filter(content['address'], 'city')
+        filter_content['address'] = none_filter(content['address'], 'street')
+        filter_content['company'] = none_filter(content['employer'], 'name')
+        filter_content['experience'] = none_filter(content['experience'], 'name')
+        filter_content['schedule'] = none_filter(content['schedule'], 'name')
+
         filter_content_page.append(filter_content)
     
     return filter_content_page
 
 
-def get_content(vacancy_name, num_page=1):
+def get_content(vacancy_name, num_page=1, ):
     """Получение списка словарей со всеми вакансиями"""
 
-    params = {'text': vacancy_name, 'per_page': 100}
+    params = {'text': vacancy_name, 'per_page': 10}
     content = []
 
     for page_index in range(num_page):
@@ -59,7 +85,7 @@ def save_csv(content, key_word='unknow'):
     """Сохранение результатов в csv файл"""
     time_now = datetime.datetime.now().strftime('%d_%m_%y_%H_%M')
 
-    with open(f'data/[{key_word}] {time_now}.csv', 'w', newline='') as file:
+    with open(f'data/[{key_word}] {time_now}.csv', 'w', newline='', encoding='utf8') as file:
         writer = csv.DictWriter(file, fieldnames=content[0].keys())
 
         writer.writeheader()
@@ -70,8 +96,8 @@ def save_csv(content, key_word='unknow'):
 
 
 def main():
-    content = get_content('Python develper', 1)
-    save_csv(content, 'Python develper')
+    content = get_content('Python develper', 10)
+    save_csv(content, key_word='Python develper')
 
 
 if __name__ == '__main__':
