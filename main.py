@@ -2,8 +2,8 @@ from multiprocessing import context
 import requests
 import datetime
 import csv 
-import json
-import os
+import matplotlib.pyplot as plt
+import numpy as np
 from fake_useragent import UserAgent
 from requests import HTTPError
 
@@ -57,6 +57,13 @@ def content_filter(content_page):
         filter_content['experience'] = none_filter(content['experience'], 'name')
         filter_content['schedule'] = none_filter(content['schedule'], 'name')
 
+        filter_content['key_skills'] = []
+        if content['key_skills'] is not None:
+            for key_skill in content['key_skills']:
+                filter_content['key_skills'].append(key_skill['name'])
+        else:
+            filter_content['key_skills'] = []
+
         filter_content_page.append(filter_content)
     
     return filter_content_page
@@ -93,12 +100,37 @@ def save_csv(content, key_word='unknow'):
             writer.writerow(row)
 
 
+def get_dependence_skills_quantity(content):
+    key_skills = []
+    for items in list(map(lambda x: x['key_skills'], content)):
+        key_skills += list(map(lambda x: x.lower(),items))
+    
+    key_skills_set = list(set(key_skills))
+
+    dependence = {}
+    for i in key_skills_set:
+        count = key_skills.count(i)
+        if count > 20:
+            dependence.update({i: count})
+
+    items = dependence.items()
+    items = sorted(list(map(lambda x: [x[1], x[0]], items)))
+    groups = list(map(lambda x: x[1], items))
+    counts = list(map(lambda x: x[0], items))
+    plt.bar(groups, counts)
+    plt.xticks(rotation = 90)
+    plt.show()
+    
+
+
 
 
 def main():
-    content = get_content('Python develper', 10)
+    content = get_content('Python develper', 30)
     save_csv(content, key_word='Python develper')
+    get_dependence_skills_quantity(content)
 
 
 if __name__ == '__main__':
     main()
+
