@@ -107,16 +107,18 @@ def get_dependence_skills_quantity(content):
     
     key_skills_set = list(set(key_skills))
 
+    total_vacancies = sum([key_skills.count(i) for i in key_skills_set])
+
     dependence = {}
     for i in key_skills_set:
         count = key_skills.count(i)
-        if count > 20:
+        if count/total_vacancies*100 > 0.5:
             dependence.update({i: count})
 
     items = dependence.items()
     items = sorted(list(map(lambda x: [x[1], x[0]], items)))
     groups = list(map(lambda x: x[1], items))
-    counts = list(map(lambda x: x[0], items))
+    counts = list(map(lambda x: x[0]/total_vacancies*100, items))
     plt.bar(groups, counts)
     plt.xticks(rotation = 90)
     plt.show()
@@ -126,8 +128,8 @@ def get_dependence_skills_quantity(content):
 
 
 def main():
-    content = get_content('Python develper', 30)
-    save_csv(content, key_word='Python develper')
+    content = get_content('python develper', 1)
+    #save_csv(content, key_word='Python develper')
     get_dependence_skills_quantity(content)
 
 
