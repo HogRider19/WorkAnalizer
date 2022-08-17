@@ -101,6 +101,7 @@ def save_csv(content, key_word='unknow'):
 
 
 def get_dependence_skills_quantity(content):
+    """Возврощает распределение ключевых навыков по частоте упоминантя в вкансиях"""
     key_skills = []
     for items in list(map(lambda x: x['key_skills'], content)):
         key_skills += list(map(lambda x: x.lower(),items))
@@ -122,15 +123,55 @@ def get_dependence_skills_quantity(content):
     plt.bar(groups, counts)
     plt.xticks(rotation = 90)
     plt.show()
+
+
+def currency_convert(value, cur_name):
+    """Конвертирует валюту в рубли"""
+    if cur_name == 'RUR':
+        return value
+    elif cur_name == 'USD':
+        return value*61
+    elif cur_name == 'EUR':
+        return value*62
+    elif cur_name == 'BYR':
+        return value*23
+    elif cur_name == 'KZT':
+        return round(value*0,129)
+
+
+def distribution_salaries(content):
+    """Возврощает зависимость зарплаты от количества вакансий"""
     
+    salary = []
+    for vacancy in content:
+        if type(vacancy['sal_from']) is int:
+            salary.append(currency_convert(vacancy['sal_from'], vacancy['currency']))
+        if type(vacancy['sal_to']) is int:
+            salary.append(currency_convert(vacancy['sal_to'], vacancy['currency']))
+    
+    salary.sort()
+    salary_min = salary[0]
+    salary_max = salary[-1]
+    step = round((salary_max-salary_min)/20)
+
+    dependence = []
+    for i in range(salary_min, salary_max, step):
+        dependence_step = 0
+        for j in salary:
+            if i < j < i + step:
+                dependence_step += 1
+        dependence.append(dependence_step)
 
 
+    plt.plot(dependence)
+    plt.show()
 
 
 def main():
-    content = get_content('python develper', 1)
+    content = get_content('develper', 30)
     #save_csv(content, key_word='Python develper')
-    get_dependence_skills_quantity(content)
+    #get_dependence_skills_quantity(content)
+    distribution_salaries(content)
 
 
 if __name__ == '__main__':
