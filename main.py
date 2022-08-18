@@ -139,39 +139,47 @@ def currency_convert(value, cur_name):
         return round(value*0,129)
 
 
-def distribution_salaries(content):
+def distribution_salaries(content, min_border, max_border):
     """Возврощает зависимость зарплаты от количества вакансий"""
     
     salary = []
     for vacancy in content:
         if type(vacancy['sal_from']) is int:
-            salary.append(currency_convert(vacancy['sal_from'], vacancy['currency']))
+            cur_conv = currency_convert(vacancy['sal_from'], vacancy['currency'])
+            if cur_conv is not None:
+                salary.append(cur_conv)
         if type(vacancy['sal_to']) is int:
-            salary.append(currency_convert(vacancy['sal_to'], vacancy['currency']))
+            cur_conv = currency_convert(vacancy['sal_to'], vacancy['currency'])
+            if cur_conv is not None:
+                salary.append(cur_conv)
     
     salary.sort()
-    salary_min = salary[0]
-    salary_max = salary[-1]
+    salary_min = min_border
+    salary_max = max_border
     step = round((salary_max-salary_min)/20)
 
     dependence = []
+    groups = []
+    print(step)
     for i in range(salary_min, salary_max, step):
         dependence_step = 0
+        groups.append(f'{round(i/1000)}-{round((i+step)/1000)}')
         for j in salary:
             if i < j < i + step:
                 dependence_step += 1
         dependence.append(dependence_step)
 
 
-    plt.plot(dependence)
+    plt.bar(groups, dependence)
+    plt.xticks(rotation = 90)
     plt.show()
 
 
 def main():
-    content = get_content('develper', 30)
+    content = get_content('develper', 20)
     #save_csv(content, key_word='Python develper')
     #get_dependence_skills_quantity(content)
-    distribution_salaries(content)
+    distribution_salaries(content, 50000, 300000)
 
 
 if __name__ == '__main__':
