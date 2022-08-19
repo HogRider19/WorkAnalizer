@@ -1,7 +1,8 @@
 from multiprocessing import context
 import requests
 import datetime
-import csv 
+import csv
+import os
 import matplotlib.pyplot as plt
 import numpy as np
 from fake_useragent import UserAgent
@@ -92,6 +93,9 @@ def save_csv(content, key_word='unknow'):
     """Сохранение результатов в csv файл"""
     time_now = datetime.datetime.now().strftime('%d_%m_%y_%H_%M')
 
+    if not os.path.isdir(f'data/[{key_word}] {time_now}'):
+        os.mkdir(f'data/[{key_word}] {time_now}')
+
     with open(f'data/[{key_word}] {time_now}.csv', 'w', newline='', encoding='utf8') as file:
         writer = csv.DictWriter(file, fieldnames=content[0].keys())
 
@@ -176,10 +180,10 @@ def distribution_salaries(content, min_border, max_border):
 
 
 def main():
-    content = get_content('develper', 20)
+    content = get_content('GСтроитель', 30)
     #save_csv(content, key_word='Python develper')
     #get_dependence_skills_quantity(content)
-    distribution_salaries(content, 50000, 300000)
+    distribution_salaries(content, 10000, 300000)
 
 
 if __name__ == '__main__':
