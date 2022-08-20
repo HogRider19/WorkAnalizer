@@ -4,6 +4,7 @@ import datetime
 import csv
 import os
 import matplotlib.pyplot as plt
+import matplotlib as mpl
 import numpy as np
 from fake_useragent import UserAgent
 from requests import HTTPError
@@ -96,13 +97,17 @@ def save_csv(content, sq_plot, ds_plot, key_word='unknow'):
     if not os.path.isdir(f'data/[{key_word}] {time_now}'):
         os.mkdir(f'data/[{key_word}] {time_now}')
 
-    plt.figure(clear=True)
+    mpl.rcParams['font.size'] = 5.0
+
+    plt.figure(clear=True, figsize=(5, 3), dpi=1000)
     plt.bar(sq_plot[0], sq_plot[1])
     plt.xticks(rotation = 90)
+    plt.tight_layout()
     plt.savefig(f'data/[{key_word}] {time_now}/distribution_salaries.png')
-    plt.figure(clear=True)
+    plt.figure(clear=True, figsize=(5, 3), dpi=1000)
     plt.bar(ds_plot[0], ds_plot[1])
     plt.xticks(rotation = 90)
+    plt.tight_layout()
     plt.savefig(f'data/[{key_word}] {time_now}/skills_quantity.png')
 
     with open(f'data/[{key_word}] {time_now}/vacancies.csv', 'w', newline='', encoding='utf8') as file:
@@ -186,11 +191,11 @@ def get_distribution_salaries(content, min_border, max_border):
 
 
 def main():
-    content = get_content('Инженер пгс', 5)
+    content = get_content('Переводчик', 5)
     sq_plot = get_dependence_skills_quantity(content)
     ds_plot = get_distribution_salaries(content, 10000, 200000)
 
-    save_csv(content, sq_plot, ds_plot, key_word='Инженер пгс')
+    save_csv(content, sq_plot, ds_plot, key_word='Переводчик')
 
 
 if __name__ == '__main__':
