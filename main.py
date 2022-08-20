@@ -89,14 +89,23 @@ def get_content(vacancy_name, num_page=1, ):
     return content
 
 
-def save_csv(content, key_word='unknow'):
+def save_csv(content, sq_plot, ds_plot, key_word='unknow'):
     """Сохранение результатов в csv файл"""
     time_now = datetime.datetime.now().strftime('%d_%m_%y_%H_%M')
 
     if not os.path.isdir(f'data/[{key_word}] {time_now}'):
         os.mkdir(f'data/[{key_word}] {time_now}')
 
-    with open(f'data/[{key_word}] {time_now}.csv', 'w', newline='', encoding='utf8') as file:
+    plt.figure(clear=True)
+    plt.bar(sq_plot[0], sq_plot[1])
+    plt.xticks(rotation = 90)
+    plt.savefig(f'data/[{key_word}] {time_now}/distribution_salaries.png')
+    plt.figure(clear=True)
+    plt.bar(ds_plot[0], ds_plot[1])
+    plt.xticks(rotation = 90)
+    plt.savefig(f'data/[{key_word}] {time_now}/skills_quantity.png')
+
+    with open(f'data/[{key_word}] {time_now}/vacancies.csv', 'w', newline='', encoding='utf8') as file:
         writer = csv.DictWriter(file, fieldnames=content[0].keys())
 
         writer.writeheader()
@@ -124,9 +133,8 @@ def get_dependence_skills_quantity(content):
     items = sorted(list(map(lambda x: [x[1], x[0]], items)))
     groups = list(map(lambda x: x[1], items))
     counts = list(map(lambda x: x[0]/total_vacancies*100, items))
-    plt.bar(groups, counts)
-    plt.xticks(rotation = 90)
-    plt.show()
+
+    return [groups, counts]
 
 
 def currency_convert(value, cur_name):
@@ -143,7 +151,7 @@ def currency_convert(value, cur_name):
         return round(value*0,129)
 
 
-def distribution_salaries(content, min_border, max_border):
+def get_distribution_salaries(content, min_border, max_border):
     """Возврощает зависимость зарплаты от количества вакансий"""
     
     salary = []
@@ -164,7 +172,7 @@ def distribution_salaries(content, min_border, max_border):
 
     dependence = []
     groups = []
-    print(step)
+
     for i in range(salary_min, salary_max, step):
         dependence_step = 0
         groups.append(f'{round(i/1000)}-{round((i+step)/1000)}')
@@ -173,17 +181,16 @@ def distribution_salaries(content, min_border, max_border):
                 dependence_step += 1
         dependence.append(dependence_step)
 
-
-    plt.bar(groups, dependence)
-    plt.xticks(rotation = 90)
-    plt.show()
+    return [groups, dependence]
+    
 
 
 def main():
-    content = get_content('GСтроитель', 30)
-    #save_csv(content, key_word='Python develper')
-    #get_dependence_skills_quantity(content)
-    distribution_salaries(content, 10000, 300000)
+    content = get_content('Инженер пгс', 5)
+    sq_plot = get_dependence_skills_quantity(content)
+    ds_plot = get_distribution_salaries(content, 10000, 200000)
+
+    save_csv(content, sq_plot, ds_plot, key_word='Инженер пгс')
 
 
 if __name__ == '__main__':
