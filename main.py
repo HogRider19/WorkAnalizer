@@ -71,10 +71,13 @@ def content_filter(content_page):
     return filter_content_page
 
 
-def get_content(vacancy_name, num_page=1, ):
+def get_content(vacancy_name, num_page=1, area_id=None):
     """Получение списка словарей со всеми вакансиями"""
 
     params = {'text': vacancy_name, 'per_page': 10}
+    if area_id is not None:
+        params['area'] = area_id
+
     content = []
 
     for page_index in range(num_page):
@@ -102,16 +105,26 @@ def save_csv(content, sq_plot, ds_plot, key_word='unknow'):
     plt.figure(clear=True, figsize=(5, 3), dpi=1000)
     plt.bar(sq_plot[0], sq_plot[1])
     plt.xticks(rotation = 90)
+    plt.title('Востребованность навыков')
     plt.tight_layout()
     plt.savefig(f'data/[{key_word}] {time_now}/distribution_salaries.png')
+
     plt.figure(clear=True, figsize=(5, 3), dpi=1000)
     plt.bar(ds_plot[0], ds_plot[1])
     plt.xticks(rotation = 90)
+    plt.title('Зависимость количества вакансий от зарплат')
     plt.tight_layout()
     plt.savefig(f'data/[{key_word}] {time_now}/skills_quantity.png')
 
+    fieldnames = [
+        'name', 'city', 'address',
+        'key_skills', 'sal_from', 'sal_to',
+        'currency', 'company', 'experience',
+        'schedule','published_at', 'description', 
+        'alternate_url', 'id'
+    ]
     with open(f'data/[{key_word}] {time_now}/vacancies.csv', 'w', newline='', encoding='utf8') as file:
-        writer = csv.DictWriter(file, fieldnames=content[0].keys())
+        writer = csv.DictWriter(file, fieldnames=fieldnames)
 
         writer.writeheader()
         for row in content:
@@ -191,11 +204,34 @@ def get_distribution_salaries(content, min_border, max_border):
 
 
 def main():
-    content = get_content('Переводчик', 5)
-    sq_plot = get_dependence_skills_quantity(content)
-    ds_plot = get_distribution_salaries(content, 10000, 200000)
+    print("Введите название вакансии:\n")
+    name = input(">>> ")
+    print('\n')
+    if name ==  '':
+        name = 'Строитель'
+        print("Будет использовано ключевое слово поумолчанию\n")
+    else:
+        print(f"Будет использовано ключевое слово:{name}\n")         
 
-    save_csv(content, sq_plot, ds_plot, key_word='Переводчик')
+    print("Сколько собрать страниц?")
+    print("\n")
+    count_element = input(">>> ")
+    print("\n")
+    if count_element ==  '':
+        count_element = 1
+        print("Будет использовано количество страниц по умолчанию\n")
+    else:
+        count_element = int(count_element)
+        print(
+            f"Будет проводиться поиск по {count_element} страницам\n"
+        )
+
+    content = get_content(name, count_element, area_id=None)
+    sq_plot = get_dependence_skills_quantity(content)
+    ds_plot = get_distribution_salaries(content, 10000, 250000)
+    save_csv(content, sq_plot, ds_plot, key_word=name)
+
+    print("\nДанне успешно сохранены\n")
 
 
 if __name__ == '__main__':
