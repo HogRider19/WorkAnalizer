@@ -169,7 +169,7 @@ def currency_convert(value, cur_name):
         return round(value*0,129)
 
 
-def get_distribution_salaries(content, min_border, max_border):
+def get_distribution_salaries(content, min_border=10000, max_border=250000):
     """Возврощает зависимость зарплаты от количества вакансий"""
     
     salary = []
@@ -200,38 +200,29 @@ def get_distribution_salaries(content, min_border, max_border):
         dependence.append(dependence_step)
 
     return [groups, dependence]
-    
+
+
+def text_interface():
+    print("Введите название вакансии:\n")
+
+    name = input(">>> ")
+    print('\n')
+
+    print("Сколько собрать страниц?\n")
+
+    count_page = int(input(">>> "))
+    print("\n")
+
+    content = get_content(name, count_page, area_id=None)
+    sq_plot = get_dependence_skills_quantity(content)
+    ds_plot = get_distribution_salaries(content, 10000, 250000)
+
+    save_csv(content, sq_plot, ds_plot, key_word=name)
+    print("\nДанне успешно сохранены\n")
 
 
 def main():
-    print("Введите название вакансии:\n")
-    name = input(">>> ")
-    print('\n')
-    if name ==  '':
-        name = 'Строитель'
-        print("Будет использовано ключевое слово поумолчанию\n")
-    else:
-        print(f"Будет использовано ключевое слово:{name}\n")         
-
-    print("Сколько собрать страниц?")
-    print("\n")
-    count_element = input(">>> ")
-    print("\n")
-    if count_element ==  '':
-        count_element = 1
-        print("Будет использовано количество страниц по умолчанию\n")
-    else:
-        count_element = int(count_element)
-        print(
-            f"Будет проводиться поиск по {count_element} страницам\n"
-        )
-
-    content = get_content(name, count_element, area_id=None)
-    sq_plot = get_dependence_skills_quantity(content)
-    ds_plot = get_distribution_salaries(content, 10000, 250000)
-    save_csv(content, sq_plot, ds_plot, key_word=name)
-
-    print("\nДанне успешно сохранены\n")
+    text_interface()
 
 
 if __name__ == '__main__':
