@@ -107,14 +107,14 @@ def save_csv(content, sq_plot, ds_plot, key_word='unknow'):
     plt.xticks(rotation = 90)
     plt.title('Востребованность навыков')
     plt.tight_layout()
-    plt.savefig(f'data/[{key_word}] {time_now}/distribution_salaries.png')
+    plt.savefig(f'data/[{key_word}] {time_now}/skills_quantity.png')
 
     plt.figure(clear=True, figsize=(5, 3), dpi=1000)
     plt.bar(ds_plot[0], ds_plot[1])
     plt.xticks(rotation = 90)
     plt.title('Зависимость количества вакансий от зарплат')
     plt.tight_layout()
-    plt.savefig(f'data/[{key_word}] {time_now}/skills_quantity.png')
+    plt.savefig(f'data/[{key_word}] {time_now}/distribution_salaries.png')
 
     fieldnames = [
         'name', 'city', 'address',
@@ -155,38 +155,31 @@ def get_dependence_skills_quantity(content):
     return [groups, counts]
 
 
-def currency_convert(value, cur_name):
-    """Конвертирует валюту в рубли"""
-    if cur_name == 'RUR':
-        return value
-    elif cur_name == 'USD':
-        return value*61
-    elif cur_name == 'EUR':
-        return value*62
-    elif cur_name == 'BYR':
-        return value*23
-    elif cur_name == 'KZT':
-        return round(value*0,129)
-
-
 def get_distribution_salaries(content, min_border=10000, max_border=250000):
     """Возврощает зависимость зарплаты от количества вакансий"""
     
+    def get_salary_or_None(salary, cur):
+        if cur == 'RUR':
+            if type(salary) is int:
+                return salary
+
     salary = []
     for vacancy in content:
-        if type(vacancy['sal_from']) is int:
-            cur_conv = currency_convert(vacancy['sal_from'], vacancy['currency'])
-            if cur_conv is not None:
-                salary.append(cur_conv)
-        if type(vacancy['sal_to']) is int:
-            cur_conv = currency_convert(vacancy['sal_to'], vacancy['currency'])
-            if cur_conv is not None:
-                salary.append(cur_conv)
+
+        salary_from = get_salary_or_None(vacancy['sal_from'], vacancy['currency'])
+        salary_to = get_salary_or_None(vacancy['sal_to'], vacancy['currency'])
+
+        if salary_from:
+            salary.append(salary_from)
+
+        if salary_to:
+            salary.append(salary_to)
+
     
     salary.sort()
     salary_min = min_border
     salary_max = max_border
-    step = round((salary_max-salary_min)/20)
+    step = 10000
 
     dependence = []
     groups = []
@@ -195,9 +188,13 @@ def get_distribution_salaries(content, min_border=10000, max_border=250000):
         dependence_step = 0
         groups.append(f'{round(i/1000)}-{round((i+step)/1000)}')
         for j in salary:
-            if i < j < i + step:
+            if i < j <= i + step:
                 dependence_step += 1
         dependence.append(dependence_step)
+
+    vacancy_len = len(salary)
+    for i in range(len(dependence)):
+        dependence[i] = dependence[i]*100/vacancy_len
 
     return [groups, dependence]
 
