@@ -93,7 +93,7 @@ def get_content(vacancy_name, num_page=1, area_id=None):
     return content
 
 
-def save_csv(content, sq_plot, ds_plot, key_word='unknow'):
+def save_csv(content, sq_plot, ds_plot, cq_plot, key_word='unknow'):
     """Сохранение результатов в csv файл"""
     time_now = datetime.datetime.now().strftime('%d_%m_%y_%H_%M')
 
@@ -108,6 +108,13 @@ def save_csv(content, sq_plot, ds_plot, key_word='unknow'):
     plt.title('Востребованность навыков')
     plt.tight_layout()
     plt.savefig(f'data/[{key_word}] {time_now}/skills_quantity.png')
+
+    plt.figure(clear=True, figsize=(5, 3), dpi=1000)
+    plt.bar(cq_plot[0], cq_plot[1])
+    plt.xticks(rotation = 90)
+    plt.title('Вакансии в городах')
+    plt.tight_layout()
+    plt.savefig(f'data/[{key_word}] {time_now}/city_quantity.png')
 
     plt.figure(clear=True, figsize=(5, 3), dpi=1000)
     plt.bar(ds_plot[0], ds_plot[1])
@@ -199,6 +206,31 @@ def get_distribution_salaries(content, min_border=10000, max_border=250000):
     return [groups, dependence]
 
 
+def get_dependence_city_quantity(content):
+    """Возврощает зависимость городов от количества вкакнсий"""
+    cities = []
+    for item in list(map(lambda x: x['city'], content)):
+        if item:
+            cities.append(item)
+    
+    cities_set = list(set(cities))
+
+    total_vacancies = len(content)
+
+    dependence = {}
+    for i in cities_set:
+        count = cities.count(i)
+        if count/total_vacancies*100 > 0.5:
+            dependence.update({i: count})
+
+    items = dependence.items()
+    items = sorted(list(map(lambda x: [x[1], x[0]], items)))
+    groups = list(map(lambda x: x[1], items))
+    counts = list(map(lambda x: x[0], items))
+
+    return [groups, counts]
+
+
 def text_interface():
     print("Введите название вакансии:\n")
 
@@ -212,9 +244,10 @@ def text_interface():
 
     content = get_content(name, count_page, area_id=None)
     sq_plot = get_dependence_skills_quantity(content)
-    ds_plot = get_distribution_salaries(content, 10000, 250000)
+    cq_plot = get_dependence_city_quantity(content)
+    ds_plot = get_distribution_salaries(content, 50000, 350000)
 
-    save_csv(content, sq_plot, ds_plot, key_word=name)
+    save_csv(content, sq_plot, ds_plot, cq_plot, key_word=name)
     print("\nДанне успешно сохранены\n")
 
 
