@@ -152,7 +152,10 @@ def get_dependence_skills_quantity(content):
     for i in key_skills_set:
         count = key_skills.count(i)
         if count/total_vacancies*100 > 0.5:
-            dependence.update({i: count})
+            skill = i
+            if len(i) > 23:
+                skill = i[:23] + '...'
+            dependence.update({skill: count})
 
     items = dependence.items()
     items = sorted(list(map(lambda x: [x[1], x[0]], items)))
@@ -245,7 +248,7 @@ def text_interface():
     content = get_content(name, count_page, area_id=None)
     sq_plot = get_dependence_skills_quantity(content)
     cq_plot = get_dependence_city_quantity(content)
-    ds_plot = get_distribution_salaries(content, 50000, 350000)
+    ds_plot = get_distribution_salaries(content, 10000, 400000)
 
     save_csv(content, sq_plot, ds_plot, cq_plot, key_word=name)
     print("\nДанне успешно сохранены\n")
