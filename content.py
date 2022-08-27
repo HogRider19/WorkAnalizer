@@ -15,38 +15,10 @@ class Content(object):
 
         self.data = data
 
-    def filter(self) -> None:
-        """Отбирает определенные поля из словаря с вакансиями"""
-        required_fields = ['id', 'name', 'published_at',
-                           'alternate_url', 'description', 'key_skills']
-
-        filter_data = []
-        for vacancy in self.data:
-
-            filter_data_once = {}
-            for required_field in required_fields:
-                filter_data_once[required_field] = vacancy[required_field]
-
-            filter_data_once['sal_from'] = vacancy['salary']['from'] if 'from' in vacancy['salary'] else None
-            filter_data_once['sal_to'] = vacancy['salary']['to'] if 'to' in vacancy['salary'] else None
-            filter_data_once['currency'] = vacancy['salary']['currency'] if 'currency' in vacancy['salary'] else None
-            filter_data_once['city'] = vacancy['address']['city'] if 'city' in vacancy['address'] else None
-            filter_data_once['address'] = vacancy['address']['street'] if 'street' in vacancy['address'] else None
-            filter_data_once['company'] = vacancy['employer']['name'] if 'name' in vacancy['employer'] else None
-            filter_data_once['experience'] = vacancy['experience']['name'] if 'name' in vacancy['experience'] else None
-            filter_data_once['schedule'] = vacancy['schedule']['name'] if 'name' in vacancy['schedule'] else None
-
-            filter_data_once['key_skills'] = []
-            if vacancy['key_skills'] is not None:
-                for key_skill in vacancy['key_skills']:
-                    filter_data_once['key_skills'].append(key_skill['name'])
-
-            filter_data.append(filter_data_once)
-
-        self.data = filter_data
 
     def calculate_dependencies(self) -> None:
         """Вычисляет зависимости для построения графиков"""
+        self._filter()
         self._calculatet_city_quantity()
         self._calculate_salaries_quantity()
         self._calculate__skills_quantity()
@@ -58,6 +30,40 @@ class Content(object):
             'salary': self.salaries_quantity,
             'skill': self.skills_quantity,
         }
+
+    def get_data(self) -> list:
+        """Возвращает хранимые данные"""
+        return self.data
+
+    def _filter(self) -> None:
+        """Отбирает определенные поля из словаря с вакансиями"""
+        required_fields = ['id', 'name', 'published_at',
+                           'alternate_url', 'description', 'key_skills']
+
+        filter_data = []
+        for vacancy in self.data:
+
+            filter_data_once = {}
+            for required_field in required_fields:
+                filter_data_once[required_field] = vacancy[required_field]
+
+            filter_data_once['sal_from'] = self._none_filter(vacancy['salary'], 'from')
+            filter_data_once['sal_to'] = self._none_filter(vacancy['salary'], 'to')
+            filter_data_once['currency'] = self._none_filter(vacancy['salary'], 'currency')
+            filter_data_once['city'] = self._none_filter(vacancy['address'], 'city')
+            filter_data_once['address'] = self._none_filter(vacancy['address'], 'street')
+            filter_data_once['company'] = self._none_filter(vacancy['employer'], 'name')
+            filter_data_once['experience'] = self._none_filter(vacancy['experience'], 'name')
+            filter_data_once['schedule'] = self._none_filter(vacancy['schedule'], 'name')
+
+            filter_data_once['key_skills'] = []
+            if vacancy['key_skills'] is not None:
+                for key_skill in vacancy['key_skills']:
+                    filter_data_once['key_skills'].append(key_skill['name'])
+
+            filter_data.append(filter_data_once)
+
+        self.data = filter_data
 
     def _calculatet_city_quantity(self, percent=0.5) -> list:
         """Рассчитывает рейтинг городов по количеству вакансий"""
@@ -124,6 +130,12 @@ class Content(object):
 
         self.skills_quantity = [groups, counts]
 
+    def _none_filter(self, data_dict, kw):
+        try:
+            return data_dict[kw]
+        except TypeError:
+            return ''
+
     def _get_unpacking_salary(self) -> list:
         """Возвращвет зарплаты в виде списка"""
         salary = []
@@ -141,7 +153,8 @@ class Content(object):
                 if salary_to:
                     salary.append(salary_to)
 
-        return salary.sort()
+        salary.sort()
+        return salary
 
     def __add__(self, other):
         if not isinstance(other, (Content, list)):
