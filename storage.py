@@ -29,7 +29,8 @@ class Storage(object):
         self._save_vacancies()
 
         for key in self.dependencies.keys():
-            self._save_plot(self.dependencies[key], info[key]['name'], info[key]['tytle'])
+            if key in info:
+                self._save_plot(self.dependencies[key], info[key]['name'], info[key]['tytle'])
 
 
     def get_main_path(self):

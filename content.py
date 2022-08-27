@@ -5,9 +5,11 @@ class Content(object):
     city_quantity = list()
     salaries_quantity = list()
     skills_quantity = list()
+    internal = False
 
-    def __init__(self, data=[]) -> None:
+    def __init__(self, data=[], internal: bool = False) -> None:
         self.data = data
+        self.internal = internal
 
     def set_data(self, data: list):
         if not isinstance(data, list):
@@ -18,7 +20,8 @@ class Content(object):
 
     def calculate_dependencies(self) -> None:
         """Вычисляет зависимости для построения графиков"""
-        self._filter()
+        if not self.internal:
+            self._internal_filter()
         self._calculatet_city_quantity()
         self._calculate_salaries_quantity()
         self._calculate__skills_quantity()
@@ -35,7 +38,22 @@ class Content(object):
         """Возвращает хранимые данные"""
         return self.data
 
-    def _filter(self) -> None:
+    def get_filter_content(self, conditions: dict):
+        """Возвращает обьект Content с отфильтрованными данными родителя"""
+        new_data = []
+        for vacancy in self.data:
+            add_flag = True
+            for key in conditions.keys():
+                if vacancy[key] != conditions[key]:
+                    add_flag = False
+            if add_flag:
+                new_data.append(vacancy)
+
+        new_content = Content(new_data)
+        new_content.internal = True
+        return new_content
+
+    def _internal_filter(self) -> None:
         """Отбирает определенные поля из словаря с вакансиями"""
         required_fields = ['id', 'name', 'published_at',
                            'alternate_url', 'description', 'key_skills']
