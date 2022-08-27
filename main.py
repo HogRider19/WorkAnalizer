@@ -11,7 +11,7 @@ MAIN_URL = 'https://api.hh.ru/'
 HEADERS = {'User-Agent': UserAgent().chrome}
 
 
-def get_json(url, params = None):
+def get_json(url, params=None):
     """Запрос json файла с вакансиями"""
     session = requests.Session()
     response = session.get(url, params=params, headers=HEADERS)
@@ -21,7 +21,8 @@ def get_json(url, params = None):
         content_list = []
         for index, content_id in enumerate(items):
             try:
-                content = session.get(url+f'{content_id}', headers=HEADERS).json()
+                content = session.get(
+                    url+f'{content_id}', headers=HEADERS).json()
                 content_list.append(content)
             except HTTPError as http_err:
                 print(f'[INFO]: HTTP error: {http_err}')
@@ -31,10 +32,10 @@ def get_json(url, params = None):
         return []
 
 
-
 def content_filter(content_page):
     """Отбирает определенные поля из словаря с вакансиями"""
-    required_fields = ['id', 'name', 'published_at', 'alternate_url', 'description', 'key_skills']
+    required_fields = ['id', 'name', 'published_at',
+                       'alternate_url', 'description', 'key_skills']
 
     filter_content_page = []
     for content in content_page:
@@ -46,7 +47,7 @@ def content_filter(content_page):
             try:
                 return data_dict[kw]
             except TypeError:
-                return '' 
+                return ''
 
         filter_content['sal_from'] = none_filter(content['salary'], 'from')
         filter_content['sal_to'] = none_filter(content['salary'], 'to')
@@ -54,7 +55,8 @@ def content_filter(content_page):
         filter_content['city'] = none_filter(content['address'], 'city')
         filter_content['address'] = none_filter(content['address'], 'street')
         filter_content['company'] = none_filter(content['employer'], 'name')
-        filter_content['experience'] = none_filter(content['experience'], 'name')
+        filter_content['experience'] = none_filter(
+            content['experience'], 'name')
         filter_content['schedule'] = none_filter(content['schedule'], 'name')
 
         filter_content['key_skills'] = []
@@ -65,7 +67,7 @@ def content_filter(content_page):
             filter_content['key_skills'] = []
 
         filter_content_page.append(filter_content)
-    
+
     return filter_content_page
 
 
@@ -102,21 +104,21 @@ def save_csv(content, sq_plot, ds_plot, cq_plot, key_word='unknow'):
 
     plt.figure(clear=True, figsize=(5, 3), dpi=1000)
     plt.bar(sq_plot[0], sq_plot[1])
-    plt.xticks(rotation = 90)
+    plt.xticks(rotation=90)
     plt.title('Востребованность навыков')
     plt.tight_layout()
     plt.savefig(f'data/[{key_word}] {time_now}/skills_quantity.png')
 
     plt.figure(clear=True, figsize=(5, 3), dpi=1000)
     plt.bar(cq_plot[0], cq_plot[1])
-    plt.xticks(rotation = 90)
+    plt.xticks(rotation=90)
     plt.title('Вакансии в городах')
     plt.tight_layout()
     plt.savefig(f'data/[{key_word}] {time_now}/city_quantity.png')
 
     plt.figure(clear=True, figsize=(5, 3), dpi=1000)
     plt.bar(ds_plot[0], ds_plot[1])
-    plt.xticks(rotation = 90)
+    plt.xticks(rotation=90)
     plt.title('Зависимость количества вакансий от зарплат')
     plt.tight_layout()
     plt.savefig(f'data/[{key_word}] {time_now}/distribution_salaries.png')
@@ -125,7 +127,7 @@ def save_csv(content, sq_plot, ds_plot, cq_plot, key_word='unknow'):
         'name', 'city', 'address',
         'key_skills', 'sal_from', 'sal_to',
         'currency', 'company', 'experience',
-        'schedule','published_at', 'description', 
+        'schedule', 'published_at', 'description',
         'alternate_url', 'id'
     ]
     with open(f'data/[{key_word}] {time_now}/vacancies.csv', 'w', newline='', encoding='utf8') as file:
@@ -140,8 +142,8 @@ def get_dependence_skills_quantity(content):
     """Возврощает распределение ключевых навыков по частоте упоминантя в вкансиях"""
     key_skills = []
     for items in list(map(lambda x: x['key_skills'], content)):
-        key_skills += list(map(lambda x: x.lower(),items))
-    
+        key_skills += list(map(lambda x: x.lower(), items))
+
     key_skills_set = list(set(key_skills))
 
     total_vacancies = sum([key_skills.count(i) for i in key_skills_set])
@@ -165,7 +167,7 @@ def get_dependence_skills_quantity(content):
 
 def get_distribution_salaries(content, min_border=10000, max_border=250000):
     """Возврощает зависимость зарплаты от количества вакансий"""
-    
+
     def get_salary_or_None(salary, cur):
         if cur == 'RUR':
             if type(salary) is int:
@@ -174,7 +176,8 @@ def get_distribution_salaries(content, min_border=10000, max_border=250000):
     salary = []
     for vacancy in content:
 
-        salary_from = get_salary_or_None(vacancy['sal_from'], vacancy['currency'])
+        salary_from = get_salary_or_None(
+            vacancy['sal_from'], vacancy['currency'])
         salary_to = get_salary_or_None(vacancy['sal_to'], vacancy['currency'])
 
         if salary_from:
@@ -183,7 +186,6 @@ def get_distribution_salaries(content, min_border=10000, max_border=250000):
         if salary_to:
             salary.append(salary_to)
 
-    
     salary.sort()
     salary_min = min_border
     salary_max = max_border
@@ -213,7 +215,7 @@ def get_dependence_city_quantity(content):
     for item in list(map(lambda x: x['city'], content)):
         if item:
             cities.append(item)
-    
+
     cities_set = list(set(cities))
 
     total_vacancies = len(content)
@@ -258,4 +260,3 @@ def main():
 
 if __name__ == '__main__':
     main()
-

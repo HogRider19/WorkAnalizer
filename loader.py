@@ -58,11 +58,3 @@ class Loader(object):
         session.close()
         return unpacked_page
 
-
-
-loader = Loader('Строитель')
-
-loader.load(count_page=3, info=True)
-
-print(loader.get_data()[0])
-
