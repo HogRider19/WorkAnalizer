@@ -1,11 +1,9 @@
-from multiprocessing import context
 import requests
 import datetime
 import csv
 import os
 import matplotlib.pyplot as plt
 import matplotlib as mpl
-import numpy as np
 from fake_useragent import UserAgent
 from requests import HTTPError
 
