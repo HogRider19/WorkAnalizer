@@ -5,7 +5,8 @@ from content import Content
 key_word = 'Developer'
 
 loader = Loader(key_word)
-loader.load(30, True)
+add_params = {'area': 2}
+loader.load(30, add_params=add_params)
 
 data_raw = loader.get_data()
 
@@ -23,14 +24,3 @@ info = {
 
 storage = Storage(data, dependencies, key_word=key_word)
 storage.save(info)
-
-
-content_new = content.get_filter_content({'city': 'Санкт-Петербург'})
-
-content_new.calculate_dependencies()
-
-dependencies_new = content_new.get_dependencies_by_dict()
-data_new = content_new.get_data()
-
-storage_new = Storage(data_new, dependencies_new, post_path=storage.get_main_path()+'/Санкт-Петербург')
-storage_new.save(info)

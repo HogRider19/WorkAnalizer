@@ -14,12 +14,12 @@ class Loader(object):
     def __init__(self, key_word: str) -> None:
         self.key_word = key_word
 
-    def load(self, count_page: int, info: bool) -> None:
+    def load(self, count_page: int, add_params: dict= {}, info: bool=True) -> None:
         """Производит загрузку данных"""
         data = []
         for page_index in range(count_page):
             try:
-                data_raw = self._get_page(page_index)
+                data_raw = self._get_page(page_index, add_params)
                 data_unpack = self._get_unpacked_page(data_raw)
                 data += data_unpack
                 if not data_unpack:
@@ -42,9 +42,10 @@ class Loader(object):
             self.MAIN_URL+url, headers=self.HEADERS, params=params)
         return responce.json()
 
-    def _get_page(self, page_index: int) -> list:
+    def _get_page(self, page_index: int, add_params: dict) -> list:
         """Возвращает словарь со страницей вакансий"""
         params = {'text': self.key_word, 'per_page': 10, 'page': page_index}
+        params.update(add_params)
         page = self._get_json('', params)
         if 'items' in page:
             return page['items']
