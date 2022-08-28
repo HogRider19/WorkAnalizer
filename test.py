@@ -5,7 +5,7 @@ from content import Content
 key_word = 'Developer'
 
 loader = Loader(key_word)
-loader.load(50, True)
+loader.load(30, True)
 
 data_raw = loader.get_data()
 

@@ -22,11 +22,14 @@ class Loader(object):
                 data_raw = self._get_page(page_index)
                 data_unpack = self._get_unpacked_page(data_raw)
                 data += data_unpack
+                if not data_unpack:
+                    break
                 if info:
                     print(f'[INFO]: Обработанно {page_index+1} из {count_page} страниц')
             except HTTPError as http_err:
                 print(f'[INFO]: HTTP error: {http_err}')
-        
+        if info:
+            print(f'\nБыло собрано {len(data)} вакансий\n')
         self.data = data
 
     def get_data(self) -> list:
@@ -43,7 +46,9 @@ class Loader(object):
         """Возвращает словарь со страницей вакансий"""
         params = {'text': self.key_word, 'per_page': 10, 'page': page_index}
         page = self._get_json('', params)
-        return page['items']
+        if 'items' in page:
+            return page['items']
+        return []
 
     def _get_unpacked_page(self, data_raw: list) -> list:
         """Возвращает словарь с распакованной страницей вакансий"""
