@@ -5,8 +5,7 @@ from content import Content
 key_word = 'Developer'
 
 loader = Loader(key_word)
-add_params = {'area': 2}
-loader.load(30, add_params=add_params)
+loader.load(30)
 
 data_raw = loader.get_data()
 

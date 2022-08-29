@@ -11,7 +11,8 @@ class Content(object):
         self.data = data
         self.internal = internal
 
-    def set_data(self, data: list):
+    def set_data(self, data: list) -> None:
+        """Заменяет данные обьекта на принятые данные"""
         if not isinstance(data, list):
             raise ArithmeticError("The right operand must be of type list")
 

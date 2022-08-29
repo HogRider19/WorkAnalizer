@@ -20,8 +20,10 @@
 ### Инструменты разработки:
 
 - Python = 3.9
-- Django = 4.0.6
-- sqlite3
+- requests = 2.28.1
+- fake-useragent = 0.1.11
+- matplotlib = 3.5.3
+- Pillow = 9.2.0
 
 ---
 
