@@ -72,7 +72,7 @@ class Content(object):
             filter_data_once['city'] = self._none_filter(vacancy['address'], 'city')
             filter_data_once['address'] = self._none_filter(vacancy['address'], 'street')
             filter_data_once['company'] = self._none_filter(vacancy['employer'], 'name')
-            filter_data_once['experience'] = self._none_filter(vacancy['experience'], 'name')
+            filter_data_once['experience'] = self._none_filter(vacancy['experience'], 'id')
             filter_data_once['schedule'] = self._none_filter(vacancy['schedule'], 'name')
 
             filter_data_once['key_skills'] = []
@@ -117,9 +117,6 @@ class Content(object):
                 if lower_step < salary <= lower_step + step:
                     dependence_step += 1
             dependence.append(dependence_step)
-
-        for i in range(len(dependence)):
-            dependence[i] = dependence[i]*100/len(salaries)
 
         self.salaries_quantity = [groups, dependence]
 

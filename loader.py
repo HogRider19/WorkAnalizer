@@ -36,6 +36,10 @@ class Loader(object):
         """Возвращвет загруженные данные"""
         return self.data
 
+    def update_useragent(self):
+        """Изменяет useragent у класса"""
+        self.HEADERS.update({'User-Agent': UserAgent().chrome})
+
     def _get_json(self, url: str, params: dict) -> dict:
         """Возвращает словарь из http запроса"""
         responce = requests.get(
