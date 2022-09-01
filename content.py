@@ -73,7 +73,7 @@ class Content(object):
             filter_data_once['address'] = self._none_filter(vacancy['address'], 'street')
             filter_data_once['company'] = self._none_filter(vacancy['employer'], 'name')
             filter_data_once['experience'] = self._none_filter(vacancy['experience'], 'id')
-            filter_data_once['schedule'] = self._none_filter(vacancy['schedule'], 'name')
+            filter_data_once['schedule'] = self._none_filter(vacancy['schedule'], 'id')
 
             filter_data_once['key_skills'] = []
             if vacancy['key_skills'] is not None:
