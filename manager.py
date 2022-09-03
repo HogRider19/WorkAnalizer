@@ -18,42 +18,30 @@ class Manager(object):
             'skill': {'name': 'skills_quantity', 'tytle': 'Востребованность навыков'},
         }   
 
-    def analysis(self, area_id: int = 2) -> None:
+    def analysis(self, area_id: int = None) -> None:
         """Производит анализ по заданным параметрам"""
-        self._main_analysis()
-        
-        if self.params.get('city', None):
-            self._city_analysis(area_id=area_id)
+        if self.info:
+            print('[INFO]: Загрузка основных данных!\n')
+        self._main_analysis(area_id)     
 
         if self.params.get('exp', None):
+            if self.info:
+                print('[INFO]: Загрузка данных по опыту!\n')
             self._exp_analysis()
 
         if self.params.get('schedule', None):
+            if self.info:
+                print('[INFO]: Загрузка данных по графику работы!\n')
             self._schedule_analysis()
 
-    def _main_analysis(self) -> None:
+    def _main_analysis(self, area_id: int = None) -> None:
         """Производит анализ полностью по всем вакансиям"""
         loader = Loader(self.key_word)
-        loader.load(self.count_page, info=self.info)
+        add_params = {'area': area_id} if area_id else {}
+        loader.load(self.count_page, info=self.info, add_params=add_params)
 
         self._loader_processing(loader)
 
-
-    def _city_analysis(self, area_id: int) -> None:
-        """Производит анализ с учетом города"""
-        loader = Loader(self.key_word)
-        add_params = {'area': area_id}
-        loader.load(self.count_page, info=self.info, add_params=add_params)
-
-        responce = requests.get(f'https://api.hh.ru/areas/{area_id}')
-        if responce.status_code == 200:
-            area_name = responce.json()['name']
-        else:
-            area_name = area_id
-
-        post_path = self.main_storage.get_main_path() + f'/{area_name}'
-
-        self._loader_processing(loader, post_path=post_path)
 
     def _exp_analysis(self) -> None: 
         """Производит анализ с учетом опыта работы"""
@@ -63,9 +51,6 @@ class Manager(object):
             {'experience': 'between3And6'},
             {'experience': 'moreThan6'},
         ]
-
-        if self.info:
-            print('\nЗагрузка данных по опыту работы\n')
 
         exp_dir = f'{self.main_storage.get_main_path()+"/Распределение по опыту"}'
         if not os.path.isdir(exp_dir):
@@ -86,7 +71,6 @@ class Manager(object):
         storage.save(info)
 
 
-
     def _schedule_analysis(self) -> None:
         """Производит анализ с учетом графика работы"""
         add_params = [
@@ -96,9 +80,6 @@ class Manager(object):
             {'schedule': 'shift'},
             {'schedule': 'fullDay'},
         ]
-
-        if self.info:
-            print('\nЗагрузка данных по графику работы работы\n')
 
         exp_dir = f'{self.main_storage.get_main_path()+"/Распределение по графику работы"}'
         if not os.path.isdir(exp_dir):
