@@ -1,7 +1,27 @@
+.env
+.venv
+env/
 venv/
-venv
+ENV/
+env.bak/
 
-data/
+dist
+db.sqlite3
 
-__pycache__
 __pycache__/
+*/__pycache__/
+*.py[cod]
+.pyc
+*.pyc
+
+db_scheme.jpg
+
+!*media/.gitkeep
+media/*
+
+secret_keys.py
+
+.vscode
+.vscode/
+
+log/debug.log
