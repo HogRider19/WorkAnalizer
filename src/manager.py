@@ -23,15 +23,17 @@ class Manager(object):
             print('[INFO]: Загрузка основных данных!\n')
         self._main_analysis(area_id)
 
-        if self.params.get('exp', None):
-            if self.info:
-                print('[INFO]: Загрузка данных по опыту!\n')
-            self._exp_analysis()
+        if 'main_storage' in dir(self):
 
-        if self.params.get('schedule', None):
-            if self.info:
-                print('[INFO]: Загрузка данных по графику работы!\n')
-            self._schedule_analysis()
+            if self.params.get('exp', None):
+                if self.info:
+                    print('[INFO]: Загрузка данных по опыту!\n')
+                self._exp_analysis()
+
+            if self.params.get('schedule', None):
+                if self.info:
+                    print('[INFO]: Загрузка данных по графику работы!\n')
+                self._schedule_analysis()
 
     def _main_analysis(self, area_id: int = None) -> None:
         """Производит анализ полностью по всем вакансиям"""

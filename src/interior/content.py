@@ -63,27 +63,27 @@ class Content(object):
 
             filter_data_once = {}
             for required_field in required_fields:
-                filter_data_once[required_field] = vacancy[required_field]
+                filter_data_once[required_field] = vacancy.get(required_field, '')
 
             filter_data_once['sal_from'] = self._none_filter(
-                vacancy['salary'], 'from')
+                vacancy.get('salary'), 'from')
             filter_data_once['sal_to'] = self._none_filter(
-                vacancy['salary'], 'to')
+                vacancy.get('salary'), 'to')
             filter_data_once['currency'] = self._none_filter(
-                vacancy['salary'], 'currency')
+                vacancy.get('salary'), 'currency')
             filter_data_once['city'] = self._none_filter(
-                vacancy['address'], 'city')
+                vacancy.get('address'), 'city')
             filter_data_once['address'] = self._none_filter(
-                vacancy['address'], 'street')
+                vacancy.get('address'), 'street')
             filter_data_once['company'] = self._none_filter(
-                vacancy['employer'], 'name')
+                vacancy.get('employer'), 'name')
             filter_data_once['experience'] = self._none_filter(
-                vacancy['experience'], 'id')
+                vacancy.get('experience'), 'id')
             filter_data_once['schedule'] = self._none_filter(
-                vacancy['schedule'], 'id')
+                vacancy.get('schedule'), 'id')
 
             filter_data_once['key_skills'] = []
-            if vacancy['key_skills'] is not None:
+            if vacancy.get('key_skills') is not None:
                 for key_skill in vacancy['key_skills']:
                     filter_data_once['key_skills'].append(key_skill['name'])
 
@@ -155,6 +155,8 @@ class Content(object):
         self.skills_quantity = [groups, counts]
 
     def _none_filter(self, data_dict, kw):
+        if data_dict is None:
+            return None
         try:
             return data_dict[kw]
         except TypeError:
