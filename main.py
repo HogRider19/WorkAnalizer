@@ -1,5 +1,5 @@
 from src.assistant import Assistant
-
+import os
 
 def main():
     assistant = Assistant()

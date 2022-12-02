@@ -27,4 +27,6 @@ secret_keys.py
 .vscode
 .vscode/
 
-log/debug.log
+logs
+
+*.log
