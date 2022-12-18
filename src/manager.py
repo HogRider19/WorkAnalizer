@@ -38,8 +38,8 @@ class Manager(object):
     def _main_analysis(self, area_id: int = None) -> None:
         """Производит анализ полностью по всем вакансиям"""
         loader = Loader(self.key_word)
-        add_params = {'area': area_id} if area_id else {}
-        loader.load(self.count_page, info=self.info, add_params=add_params)
+        params = {'area': area_id} if area_id else {}
+        loader.load(self.count_page, info=self.info, params=params)
 
         self._loader_processing(loader)
 

@@ -1,8 +1,90 @@
 from fake_useragent import UserAgent
 from requests import HTTPError
 import requests
+import config
+import aiohttp
+import asyncio
 
 
+async def load_page_using_id(ids: list, session):
+    pass
+
+
+class Loader:
+
+    _MAIN_URL = config.MAIN_URL
+
+    def __init__(self, key_word: str) -> None:
+        self._key_word = key_word
+        self.headers = {}
+        self._data = []
+
+    def load(self, count: int, params: dict, info: bool = True):
+        """Начинает загрузку данных"""
+        ids = self._get_vacancies_id(count, params)
+        print('Start load')
+        data = asyncio.run(self._load_data_using_id(ids[10]))
+        print('Finish load')
+
+        self._data = data 
+
+    def get_data(self):
+        return self._data
+
+    def update_useragent(self):
+        self.HEADERS.update({'User-Agent': UserAgent().chrome})
+
+    def _get_vacancies_id(self, count: int, params: dict):
+        session = requests.Session()
+        base_params = {'text': self._key_word, 'per_page': 100, 'page': 0}
+        base_params.update(params)
+
+        ids = []
+        for page_index in range(round(count/100) + 1):
+            base_params.update({'page': page_index})
+            try:
+                page = session.get(
+                    self._MAIN_URL,
+                    params=base_params,
+                    headers=self.headers).json()
+
+                if 'items' in page:
+                    ids.extend(map(lambda v: v['id'], page['items']))
+                else:
+                    break
+            except HTTPError as http_error:
+                print(f'[INFO]: HTTP error: {http_error}')
+
+        return ids
+
+    async def _load_data_using_id(self, ids: list):
+        data = []
+        async with aiohttp.ClientSession() as session:
+            tasks = []
+            for id in ids:
+                tasks.append(asyncio.create_task(self._load_vacancy_info(id, session)))
+
+            for task in tasks:
+                data.append(await task)
+        return data
+
+    async def _load_vacancy_info(self, id: list, session):
+        async with session.get(f"{self._MAIN_URL}{id}") as response:
+            print(f"Loading... id: {id}")
+            json = await response.json()
+            return json
+
+
+
+
+loader = Loader('Developer')
+
+loader.load(10, {}, True)
+
+print(loader.get_data())
+
+
+'''
 class Loader(object):
 
     key_word = ''
@@ -14,12 +96,12 @@ class Loader(object):
     def __init__(self, key_word: str) -> None:
         self.key_word = key_word
 
-    def load(self, count_page: int, add_params: dict = {}, info: bool = True) -> None:
+    def load(self, count_page: int, params: dict = {}, info: bool = True) -> None:
         """Производит загрузку данных"""
         data = []
         for page_index in range(count_page):
             try:
-                data_raw = self._get_page(page_index, add_params)
+                data_raw = self._get_page(page_index, params)
                 data_unpack = self._get_unpacked_page(data_raw)
                 data += data_unpack
                 if not data_unpack:
@@ -69,3 +151,4 @@ class Loader(object):
                 print(f'[INFO]: HTTP error: {http_err}')
         session.close()
         return unpacked_page
+'''
