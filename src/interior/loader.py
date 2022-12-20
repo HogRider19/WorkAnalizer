@@ -1,13 +1,12 @@
 from fake_useragent import UserAgent
 from requests import HTTPError
 import requests
-import config
+from . import config
 import aiohttp
 import asyncio
-
-
-async def load_page_using_id(ids: list, session):
-    pass
+import time
+import random
+from progress.bar import ChargingBar
 
 
 class Loader:
@@ -19,12 +18,13 @@ class Loader:
         self.headers = {}
         self._data = []
 
-    def load(self, count: int, params: dict, info: bool = True):
+    def load(self, count_page: int, params: dict, info: bool = True):
         """Начинает загрузку данных"""
-        ids = self._get_vacancies_id(count, params)
-        print('Start load')
-        data = asyncio.run(self._load_data_using_id(ids[10]))
-        print('Finish load')
+        ids = self._get_vacancies_id(count_page*10, params)
+
+        self._bar = ChargingBar('Processing', max=len(ids))
+        data = asyncio.run(self._load_data_using_id(ids))
+        self._bar.finish()
 
         self._data = data 
 
@@ -32,7 +32,7 @@ class Loader:
         return self._data
 
     def update_useragent(self):
-        self.HEADERS.update({'User-Agent': UserAgent().chrome})
+        self.headers.update({'User-Agent': UserAgent().chrome})
 
     def _get_vacancies_id(self, count: int, params: dict):
         session = requests.Session()
@@ -64,24 +64,18 @@ class Loader:
             for id in ids:
                 tasks.append(asyncio.create_task(self._load_vacancy_info(id, session)))
 
-            for task in tasks:
+            for index, task in enumerate(tasks):
+                if index % 20 == 0:
+                    self.update_useragent()
+                    time.sleep(1) 
                 data.append(await task)
         return data
 
     async def _load_vacancy_info(self, id: list, session):
         async with session.get(f"{self._MAIN_URL}{id}") as response:
-            print(f"Loading... id: {id}")
             json = await response.json()
+            self._bar.next()
             return json
-
-
-
-
-loader = Loader('Developer')
-
-loader.load(10, {}, True)
-
-print(loader.get_data())
 
 
 '''

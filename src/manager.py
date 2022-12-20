@@ -27,7 +27,7 @@ class Manager(object):
 
             if self.params.get('exp', None):
                 if self.info:
-                    print('[INFO]: Загрузка данных по опыту!\n')
+                    print('\n[INFO]: Загрузка данных по опыту!\n')
                 self._exp_analysis()
 
             if self.params.get('schedule', None):
